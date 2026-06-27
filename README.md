@@ -57,3 +57,13 @@ The application is fully responsive and optimized for:
 - API Routes
 
 ## 📦 Installation
+
+```bash
+git clone <repository-url>
+
+cd expense-tracker
+
+npm install
+
+npm run dev
+```
