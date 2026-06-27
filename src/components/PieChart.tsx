@@ -49,13 +49,9 @@ export default function BasicPie({ expenses }: Props) {
             data: chartData,
           },
         ]}
-        width={300}
+        width={220}
         height={220}
-        slotProps={{
-          legend: {
-            hidden: true,
-          },
-        }}
+        hideLegend
       />
 
       {/* Custom Legend */}
