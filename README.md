@@ -67,3 +67,13 @@ npm install
 
 npm run dev
 ```
+
+Open `http://localhost:3000` in your browser.
+
+## 🌐 Deployment
+
+The application is deployed on **Vercel**.
+
+## 📄 License
+
+This project is created for learning and assignment purposes.
