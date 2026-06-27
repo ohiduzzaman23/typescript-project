@@ -43,3 +43,17 @@ The application is fully responsive and optimized for:
 - Built with **Tailwind CSS**
 
 ## ⭐ Bonus Features
+
+- Filter expenses by category
+- Filter expenses by date range
+- Pie chart visualization of expenses by category using **Chart.js** or **Recharts**
+
+## 🛠️ Tech Stack
+
+- Next.js
+- TypeScript
+- Tailwind CSS
+- MongoDB
+- API Routes
+
+## 📦 Installation
