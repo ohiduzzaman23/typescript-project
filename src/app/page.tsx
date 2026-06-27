@@ -21,6 +21,10 @@ export default function Home() {
   const [category, setCategory] = useState("Food");
   const [date, setDate] = useState("");
 
+  const [filterCategory, setFilterCategory] = useState("All categories");
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+
   useEffect(() => {
     fetch("http://localhost:3000/api/expense")
       .then((res) => res.json())
@@ -105,8 +109,21 @@ export default function Home() {
     }
   };
 
-  const totalAmount = expenses.reduce(
-    (total, item) => total + Number(item.amount || 0),
+  const filteredExpenses = expenses.filter((item) => {
+    const categoryMatch =
+      filterCategory === "All categories" || item.category === filterCategory;
+
+    const itemDate = new Date(item.date);
+
+    const fromMatch = !fromDate || itemDate >= new Date(fromDate);
+
+    const toMatch = !toDate || itemDate <= new Date(toDate);
+
+    return categoryMatch && fromMatch && toMatch;
+  });
+
+  const totalAmount = filteredExpenses.reduce(
+    (total, item) => total + Number(item.amount),
     0,
   );
 
@@ -188,7 +205,7 @@ export default function Home() {
             <h3 className="font-semibold text-slate-700 mb-6">By category</h3>
 
             <div className=" flex items-center justify-center text-slate-400">
-              <BasicPie expenses={expenses} />
+              <BasicPie expenses={filteredExpenses} />
             </div>
           </div>
         </div>
@@ -277,7 +294,11 @@ export default function Home() {
                 <div>
                   <label className="text-sm font-medium">Category</label>
 
-                  <select className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm">
+                  <select
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm"
+                  >
                     <option>All categories</option>
                     <option>Food</option>
                     <option>Transport</option>
@@ -294,6 +315,8 @@ export default function Home() {
 
                     <input
                       type="date"
+                      value={fromDate}
+                      onChange={(e) => setFromDate(e.target.value)}
                       className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm"
                     />
                   </div>
@@ -303,6 +326,8 @@ export default function Home() {
 
                     <input
                       type="date"
+                      value={toDate}
+                      onChange={(e) => setToDate(e.target.value)}
                       className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm"
                     />
                   </div>
@@ -318,7 +343,7 @@ export default function Home() {
                 <div>
                   <h3 className="text-2xl font-semibold">Expenses</h3>
                   <p className="text-slate-400">
-                    {expenses.length} entries shown
+                    {filteredExpenses.length} entries shown
                   </p>
                 </div>
 
@@ -334,7 +359,7 @@ export default function Home() {
               </div>
 
               <div className=" flex flex-col">
-                {[...expenses].reverse().map((item) => (
+                {[...filteredExpenses].reverse().map((item) => (
                   <Items
                     key={item._id}
                     item={item}
