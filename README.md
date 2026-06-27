@@ -41,3 +41,5 @@ The application is fully responsive and optimized for:
 - Clean and modern interface
 - User-friendly experience
 - Built with **Tailwind CSS**
+
+## ⭐ Bonus Features
