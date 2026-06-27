@@ -1,65 +1,352 @@
-import Image from "next/image";
+"use client";
+import Items from "@/components/Items";
+import BasicPie from "@/components/PieChart";
+import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
+
+interface Expense {
+  _id: string;
+  title: string;
+  amount: number;
+  category: string;
+  date: string;
+}
 
 export default function Home() {
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [title, setTitle] = useState("");
+  const [amount, setAmount] = useState("");
+  const [category, setCategory] = useState("Food");
+  const [date, setDate] = useState("");
+
+  useEffect(() => {
+    fetch("http://localhost:3000/api/expense")
+      .then((res) => res.json())
+      .then((data) => setExpenses(data.result));
+  }, []);
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    const form = e.currentTarget as HTMLFormElement;
+    const data = {
+      title,
+      amount: Number(amount),
+      category,
+      date,
+    };
+
+    if (editingId) {
+      // Update
+      const res = await fetch(`/api/expense/${editingId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      const resData = await res.json();
+
+      if (resData.result.modifiedCount > 0) {
+        Swal.fire({
+          title: "Updated!",
+          text: "Expense updated successfully.",
+          icon: "success",
+        });
+        setExpenses((prev) =>
+          prev.map((item) =>
+            item._id === editingId ? { ...item, ...data } : item,
+          ),
+        );
+
+        setEditingId(null);
+        setTitle("");
+        setAmount("");
+        setCategory("Food");
+        setDate("");
+      }
+
+      return;
+    }
+
+    const res = await fetch("http://localhost:3000/api/expense", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const resData = await res.json();
+
+    if (resData.result?.insertedId) {
+      const newExpense: Expense = {
+        _id: resData.result.insertedId,
+        title: String(title),
+        amount: Number(amount),
+        category: String(category),
+        date: String(date),
+      };
+
+      setExpenses((prev) => [...prev, newExpense]);
+
+      setTitle("");
+      setAmount("");
+      setCategory("Food");
+      setDate("");
+
+      Swal.fire("Success!", "Expense added successfully.", "success");
+
+      form.reset();
+      alert("Success");
+    }
+  };
+
+  const totalAmount = expenses.reduce(
+    (total, item) => total + Number(item.amount || 0),
+    0,
+  );
+
+  // Delete
+  const handleDelete = async (id: string) => {
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (!result.isConfirmed) return;
+
+    const res = await fetch(`/api/expense/${id}`, {
+      method: "DELETE",
+    });
+
+    const data = await res.json();
+
+    if (data.result.deletedCount > 0) {
+      setExpenses((prev) => prev.filter((item) => item._id !== id));
+
+      Swal.fire({
+        title: "Deleted!",
+        text: "Expense has been deleted successfully.",
+        icon: "success",
+        timer: 1500,
+        showConfirmButton: false,
+      });
+    }
+  };
+
+  // update
+  const handleUpdate = (id: string) => {
+    const expense = expenses.find((item) => item._id === id);
+
+    if (!expense) return;
+
+    setEditingId(id);
+    setTitle(expense.title);
+    setAmount(String(expense.amount));
+    setCategory(expense.category);
+    setDate(expense.date);
+  };
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+    <main className="min-h-screen py-15 px-30">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl">
+            💳
+          </div>
+
+          <div>
+            <h1 className="text-4xl font-bold text-slate-900">Spendly</h1>
+            <p className="text-slate-500">Track where your money goes.</p>
+          </div>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Top Section */}
+        <div className="grid lg:grid-cols-3 gap-6 mb-10">
+          {/* Total Card */}
+          <div className="bg-white rounded-3xl shadow-sm p-6">
+            <p className="text-slate-500 text-sm mb-4">↗ Total spent</p>
+
+            <h2 className="text-3xl font-bold text-slate-900">
+              US${totalAmount.toFixed(2)}
+            </h2>
+            <p className="text-slate-400 mt-2">Across 0 entries</p>
+          </div>
+
+          {/* Category Chart */}
+          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm p-6">
+            <h3 className="font-semibold text-slate-700 mb-6">By category</h3>
+
+            <div className=" flex items-center justify-center text-slate-400">
+              <BasicPie expenses={expenses} />
+            </div>
+          </div>
         </div>
-      </main>
-    </div>
+
+        {/* Bottom Section */}
+        <div className="grid lg:grid-cols-12 gap-6">
+          {/* Sidebar */}
+          <div className="lg:col-span-4 space-y-6">
+            {/* Add Expense */}
+            <div className="bg-white rounded-3xl shadow-sm p-6">
+              <h3 className="text-xl font-semibold mb-6">Add expense</h3>
+
+              <form onSubmit={handleSubmit}>
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">Title</label>
+                    <input
+                      type="text"
+                      name="title"
+                      value={title}
+                      onChange={(e) => setTitle(e.target.value)}
+                      required
+                      onInvalid={(e) =>
+                        e.currentTarget.setCustomValidity("Title is required")
+                      }
+                      onInput={(e) => e.currentTarget.setCustomValidity("")}
+                      placeholder="Coffee with team"
+                      className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm outline-none focus:ring-2 focus:ring-slate-900"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">Amount</label>
+                      <input
+                        type="number"
+                        name="amount"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        placeholder="0.00"
+                        className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm outline-none"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium">Category</label>
+                      <select
+                        name="category"
+                        value={category}
+                        onChange={(e) => setCategory(e.target.value)}
+                        className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm outline-none "
+                      >
+                        <option>Food</option>
+                        <option>Transport</option>
+                        <option>Shopping</option>
+                        <option>Bills</option>
+                        <option>Entertainment</option>
+                        <option>Others</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">Date</label>
+                    <input
+                      type="date"
+                      name="date"
+                      value={date}
+                      onChange={(e) => setDate(e.target.value)}
+                      className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm outline-none"
+                    />
+                  </div>
+
+                  <button className="w-full bg-slate-900 text-white py-3 rounded-xl">
+                    {editingId ? "Update Expense" : "Add Expense"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Filters */}
+            <div className="bg-white rounded-3xl shadow-sm shadow-sm p-6">
+              <h3 className="text-xl font-semibold mb-6">Filters</h3>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">Category</label>
+
+                  <select className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm">
+                    <option>All categories</option>
+                    <option>Food</option>
+                    <option>Transport</option>
+                    <option>Shopping</option>
+                    <option>Bills</option>
+                    <option>Entertainment</option>
+                    <option>Others</option>
+                  </select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">From</label>
+
+                    <input
+                      type="date"
+                      className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">To</label>
+
+                    <input
+                      type="date"
+                      className="w-full mt-2 px-4 py-3 rounded-xl shadow-sm"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Expense List */}
+          <div className="lg:col-span-8">
+            <div className="bg-white rounded-3xl shadow-sm p-6 min-h-[620px]">
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <h3 className="text-2xl font-semibold">Expenses</h3>
+                  <p className="text-slate-400">
+                    {expenses.length} entries shown
+                  </p>
+                </div>
+
+                <div className="text-right">
+                  <p className="text-xs uppercase text-slate-400">
+                    Filtered Total
+                  </p>
+
+                  <h3 className="text-2xl font-bold">
+                    US${totalAmount.toFixed(2)}
+                  </h3>
+                </div>
+              </div>
+
+              <div className=" flex flex-col">
+                {[...expenses].reverse().map((item) => (
+                  <Items
+                    key={item._id}
+                    item={item}
+                    handleDelete={handleDelete}
+                    handleUpdate={handleUpdate}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
   );
 }
