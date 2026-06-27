@@ -42,15 +42,15 @@ export default function BasicPie({ expenses }: Props) {
   );
 
   return (
-    <div className="flex items-center justify-between">
+    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
       <PieChart
         series={[
           {
             data: chartData,
           },
         ]}
-        width={250}
-        height={250}
+        width={300}
+        height={220}
         slotProps={{
           legend: {
             hidden: true,
@@ -59,11 +59,11 @@ export default function BasicPie({ expenses }: Props) {
       />
 
       {/* Custom Legend */}
-      <div className="space-y-3 ml-5">
+      <div className="w-full lg:w-auto space-y-3">
         {chartData.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between gap-8"
+            className="flex items-center justify-between gap-4"
           >
             <div className="flex items-center gap-2">
               <span

@@ -177,34 +177,41 @@ export default function Home() {
     <main className="min-h-screen py-15 px-30">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-xl bg-slate-900 flex items-center justify-center text-white text-xl shrink-0">
             💳
           </div>
 
           <div>
-            <h1 className="text-4xl font-bold text-slate-900">Spendly</h1>
-            <p className="text-slate-500">Track where your money goes.</p>
+            <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-slate-900">
+              Spendly
+            </h1>
+            <p className="text-sm sm:text-base text-slate-500">
+              Track where your money goes.
+            </p>
           </div>
         </div>
 
         {/* Top Section */}
-        <div className="grid lg:grid-cols-3 gap-6 mb-10">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10">
           {/* Total Card */}
-          <div className="bg-white rounded-3xl shadow-sm p-6">
+          <div className="bg-white rounded-3xl shadow-sm p-5 sm:p-6">
             <p className="text-slate-500 text-sm mb-4">↗ Total spent</p>
 
-            <h2 className="text-3xl font-bold text-slate-900">
+            <h2 className="text-2xl sm:text-3xl font-bold text-slate-900 break-words">
               US${totalAmount.toFixed(2)}
             </h2>
-            <p className="text-slate-400 mt-2">Across 0 entries</p>
+
+            <p className="text-slate-400 mt-2">
+              Across {filteredExpenses.length} entries
+            </p>
           </div>
 
           {/* Category Chart */}
-          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm p-6">
+          <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm p-5 sm:p-6">
             <h3 className="font-semibold text-slate-700 mb-6">By category</h3>
 
-            <div className=" flex items-center justify-center text-slate-400">
+            <div className="w-full  flex items-center justify-center">
               <BasicPie expenses={filteredExpenses} />
             </div>
           </div>
