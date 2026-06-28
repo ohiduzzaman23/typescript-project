@@ -26,7 +26,7 @@ export default function Home() {
   const [toDate, setToDate] = useState("");
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/expense")
+    fetch("/api/expense")
       .then((res) => res.json())
       .then((data) => setExpenses(data.result));
   }, []);
@@ -76,7 +76,7 @@ export default function Home() {
       return;
     }
 
-    const res = await fetch("http://localhost:3000/api/expense", {
+    const res = await fetch("/api/expense", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
