@@ -211,7 +211,7 @@ export default function Home() {
           <div className="lg:col-span-2 bg-white rounded-3xl shadow-sm p-5 sm:p-6">
             <h3 className="font-semibold text-slate-700 mb-6">By category</h3>
 
-            <div className="w-full  flex items-center justify-center">
+            <div className="w-full flex items-center justify-center">
               <BasicPie expenses={filteredExpenses} />
             </div>
           </div>
