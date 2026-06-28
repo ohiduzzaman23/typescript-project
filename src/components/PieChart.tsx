@@ -42,7 +42,7 @@ export default function BasicPie({ expenses }: Props) {
   );
 
   return (
-    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 w-full">
+    <div className="flex flex-col lg:flex-row items-center lg:items-start gap-6 ">
       <PieChart
         series={[
           {
